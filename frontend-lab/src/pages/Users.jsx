@@ -1,33 +1,132 @@
-
-import { useLocalStorage } from '../hooks/useLocalStorage.js';
+import { useState } from 'react';
+import { useUsers } from '../hooks/useUsers.js';
+import { useCreateUser } from '../hooks/useCreateUser.js';
+import { useUIStore } from '../store/ui.js';
 import UserCard from '../components/UserCard.jsx';
 
-const users = [
-  { id: 1, name: 'Sneha Pandey', email: 'sneha@example.com' },
-  { id: 2, name: 'Ram Sharma', email: 'ram@example.com' },
-  { id: 3, name: 'Sita Thapa', email: 'sita@example.com' },
-];
-
 export default function Users() {
-  const [search, setSearch] = useLocalStorage('userSearch', '');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
-  const filteredUsers = users.filter((user) =>
+  const search = useUIStore((state) => state.search);
+  const setSearch = useUIStore((state) => state.setSearch);
+  const view = useUIStore((state) => state.view);
+  const setView = useUIStore((state) => state.setView);
+
+  const { data: users, isLoading, isError, error } = useUsers();
+  const createUserMutation = useCreateUser();
+
+  const filteredUsers = (users ?? []).filter((user) =>
     user.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    createUserMutation.mutate(
+      { name, email },
+      {
+        onSuccess: () => {
+          setName('');
+          setEmail('');
+        },
+      }
+    );
+  }
+
+  if (isLoading) {
+    return <p className="text-muted">Loading users...</p>;
+  }
+
+  if (isError) {
+    return (
+      <p className="text-red-500">
+        Error loading users: {error.message}
+      </p>
+    );
+  }
 
   return (
     <section className="space-y-6">
       <h1 className="text-3xl font-bold text-fg">Users</h1>
 
-      <input
-        type="text"
-        placeholder="Search users..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-md rounded-card border border-line bg-surface px-4 py-3 text-fg outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      />
+      <form onSubmit={handleSubmit} className="max-w-md space-y-3">
+        <h2 className="text-xl font-semibold text-fg">Add New User</h2>
 
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <input
+          type="text"
+          placeholder="Enter name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full rounded-card border border-line bg-surface px-4 py-3 text-fg"
+        />
+
+        <input
+          type="email"
+          placeholder="Enter email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full rounded-card border border-line bg-surface px-4 py-3 text-fg"
+        />
+
+        <button
+          type="submit"
+          disabled={createUserMutation.isPending}
+          className="rounded-card bg-primary px-5 py-3 text-white disabled:opacity-50"
+        >
+          {createUserMutation.isPending ? 'Adding...' : 'Add User'}
+        </button>
+
+        {createUserMutation.isError && (
+          <p className="text-red-500">
+            Error adding user: {createUserMutation.error.message}
+          </p>
+        )}
+      </form>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-md rounded-card border border-line bg-surface px-4 py-3 text-fg outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        />
+
+        <button
+          type="button"
+          onClick={() => setView('grid')}
+          className={`rounded-card border px-4 py-2 ${
+            view === 'grid'
+              ? 'bg-primary text-white'
+              : 'border-line text-fg'
+          }`}
+        >
+          Grid
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setView('list')}
+          className={`rounded-card border px-4 py-2 ${
+            view === 'list'
+              ? 'bg-primary text-white'
+              : 'border-line text-fg'
+          }`}
+        >
+          List
+        </button>
+      </div>
+
+      <ul
+        className={
+          view === 'grid'
+            ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
+            : 'flex flex-col gap-4'
+        }
+      >
         {filteredUsers.map((user) => (
           <li key={user.id}>
             <UserCard user={user} />

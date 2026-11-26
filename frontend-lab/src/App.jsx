@@ -4,7 +4,7 @@ import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Home from './pages/Home.jsx';
 import Users from './pages/Users.jsx';
-import UserDetail, { userDetailLoader } from './pages/UserDetail.jsx';
+import UserDetail from './pages/UserDetail.jsx';
 import Login from './pages/Login.jsx';
 import Profile from './pages/Profile.jsx';
 import NotFound from './pages/NotFound.jsx';
@@ -18,7 +18,6 @@ export const router = createBrowserRouter([
       {
         path: 'users/:id',
         element: <UserDetail />,
-        loader: userDetailLoader,
       },
       { path: 'login', element: <Login /> },
       {
