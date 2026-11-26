@@ -1,20 +1,24 @@
-import { Link, useLoaderData } from 'react-router-dom';
+
+import { Link, useParams } from 'react-router-dom';
 import { Card } from '../components/ui/Card.jsx';
 import { Button } from '../components/ui/Button.jsx';
-
-const users = [
-  { id: 1, name: 'Sneha Pandey', email: 'sneha@example.com' },
-  { id: 2, name: 'Ram Sharma', email: 'ram@example.com' },
-  { id: 3, name: 'Sita Thapa', email: 'sita@example.com' },
-];
-
-export function userDetailLoader({ params }) {
-  const user = users.find((u) => u.id === Number(params.id));
-  return user || null;
-}
+import { useUser } from '../hooks/useUsers.js';
 
 export default function UserDetail() {
-  const user = useLoaderData();
+  const { id } = useParams();
+  const { data: user, isLoading, isError, error } = useUser(id);
+
+  if (isLoading) {
+    return <p className="text-muted">Loading user details...</p>;
+  }
+
+  if (isError) {
+    return (
+      <p className="text-red-500">
+        Error loading user: {error.message}
+      </p>
+    );
+  }
 
   if (!user) {
     return (
