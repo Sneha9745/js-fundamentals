@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useUsers } from '../hooks/useUsers.js';
 import { useCreateUser } from '../hooks/useCreateUser.js';
 import { useUIStore } from '../store/ui.js';
 import UserCard from '../components/UserCard.jsx';
 
+const UserStats = lazy(() => import('../components/UserStats.jsx'));
+
 export default function Users() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [showStats, setShowStats] = useState(false);
 
   const search = useUIStore((state) => state.search);
   const setSearch = useUIStore((state) => state.setSearch);
@@ -49,6 +52,20 @@ export default function Users() {
   return (
     <section className="space-y-6">
       <h1 className="text-3xl font-bold text-fg">Users</h1>
+
+      <button
+        type="button"
+        onClick={() => setShowStats((show) => !show)}
+        className="rounded-card bg-primary px-5 py-3 text-white"
+      >
+        {showStats ? 'Hide Statistics' : 'Show Statistics'}
+      </button>
+
+      {showStats && (
+        <Suspense fallback={<p role="status">Loading statistics...</p>}>
+          <UserStats users={users ?? []} />
+        </Suspense>
+      )}
 
       <form onSubmit={handleSubmit} className="max-w-md space-y-3">
         <h2 className="text-xl font-semibold text-fg">Add New User</h2>
