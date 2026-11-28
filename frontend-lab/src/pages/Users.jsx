@@ -1,3 +1,4 @@
+
 import { useState, lazy, Suspense } from 'react';
 import { useUsers } from '../hooks/useUsers.js';
 import { useCreateUser } from '../hooks/useCreateUser.js';
@@ -38,7 +39,18 @@ export default function Users() {
   }
 
   if (isLoading) {
-    return <p className="text-muted">Loading users...</p>;
+    return (
+      <div
+        className="min-h-64 space-y-4"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="text-muted">Loading users...</p>
+        <div className="h-20 animate-pulse rounded-card bg-surface" />
+        <div className="h-20 animate-pulse rounded-card bg-surface" />
+        <div className="h-20 animate-pulse rounded-card bg-surface" />
+      </div>
+    );
   }
 
   if (isError) {

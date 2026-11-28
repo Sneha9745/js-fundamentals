@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { router } from './App.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { reportWebVitals } from './reportWebVitals.js';
 
 import './index.css';
 
@@ -33,3 +34,5 @@ createRoot(document.getElementById('root')).render(
     </QueryClientProvider>
   </StrictMode>,
 );
+
+reportWebVitals();
